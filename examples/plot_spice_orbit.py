@@ -16,11 +16,13 @@ import astropy.units as u
 import numpy as np
 
 ###############################################################################
-# Load the solar orbiter spice kernel. HelioPy will automatically fetch the
+# Load the Parker Solar Probe SPICE kernel. HelioPy will automatically fetch the
 # latest kernel
 kernels = spicedata.get_kernel('psp')
 kernels += spicedata.get_kernel('psp_pred')
 spice.furnish(kernels)
+# Parker Solar Probe used to be known as 'Solar Probe Plus', which explains the
+# different acronym used below.
 psp = spice.Trajectory('SPP')
 
 ###############################################################################
