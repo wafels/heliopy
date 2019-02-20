@@ -124,10 +124,9 @@ class Trajectory:
                                                             self._spice_frame,
                                                             correction,
                                                             self._observing_body)
-
         # Extract the position and the velocity
         position = np.array(position_and_velocity)[0:3] * u.km
-        velocities = np.array(position_and_velocity)[:, 3:] * u.km / u.s
+        velocities = np.array(position_and_velocity)[3:] * u.km / u.s
 
         return SkyCoord(position[0], position[1], position[2],
                         frame=ICRS, representation_type='cartesian', obstime=time), velocities
@@ -161,6 +160,22 @@ class Trajectory:
 
         """
         return self.coordinate_and_velocity(time, correction=correction)[1]
+
+    def speed(self, time, correction="NONE"):
+        """
+        Returns the speed of the target at a specific time.
+
+        Parameters
+        ----------
+        time :
+        correction :
+
+        Returns
+        -------
+
+        """
+        v = self.velocity(time, correction=correction)[1]
+        return np.sqrt(np.sum(v**2))
 
     @property
     def observing_body(self):
