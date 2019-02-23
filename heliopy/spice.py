@@ -7,6 +7,7 @@ import numpy as np
 import spiceypy
 import astropy.units as u
 from astropy.coordinates import SkyCoord, ICRS
+from sunpy.coordinates.frames import HeliographicStonyhurst
 
 data_dir = config['download_dir']
 spice_dir = os.path.join(data_dir, 'spice')
@@ -82,7 +83,6 @@ class Trajectory:
             for a list of bodies.
 
         """
-        _setup_spice()
         self._target = target
         self._observing_body = observing_body
 
@@ -129,7 +129,8 @@ class Trajectory:
         velocities = np.array(position_and_velocity)[3:] * u.km / u.s
 
         return SkyCoord(position[0], position[1], position[2],
-                        frame=ICRS, representation_type='cartesian', obstime=time), velocities
+                        frame=ICRS,
+                        representation_type='cartesian', obstime=time), velocities
 
     def coordinate(self, time, correction="NONE"):
         """
@@ -191,3 +192,10 @@ class Trajectory:
         The body whose coordinates are being calculated.
         """
         return self._target
+
+    @property
+    def spice_frame(self):
+        """
+        The coordinate frame used by SPICE.
+        """
+        return self._spice_frame
