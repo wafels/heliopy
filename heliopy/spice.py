@@ -7,7 +7,6 @@ import numpy as np
 import spiceypy
 import astropy.units as u
 from astropy.coordinates import SkyCoord, ICRS
-from sunpy.coordinates.frames import HeliographicStonyhurst
 
 data_dir = config['download_dir']
 spice_dir = os.path.join(data_dir, 'spice')
@@ -15,7 +14,7 @@ spice_dir = os.path.join(data_dir, 'spice')
 _SPICE_SETUP = False
 
 
-def _setup_spice():
+def setup_spice():
     """
     Method to download some common files that spice needs to do orbit
     calculations.
@@ -64,12 +63,8 @@ class Trajectory:
     -----
     When an instance of this class is created, a leapseconds kernel and a
     planets kernel are both automatically loaded.
-
-    See also
-    --------
-    furnish : for loading in local spice kernels.
     """
-    def __init__(self, target, observing_body='Sun'):
+    def __init__(self, target, observing_body='Sun', spice_frame='J2000'):
         """
         Generate positions from a spice kernel.
 
@@ -89,7 +84,7 @@ class Trajectory:
         # SPICE frame used. The coordinate system to return the positions in. See
         # https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/frames.html for a list of frames.
         # This is set to J2000 as this can be used by the Astropy coordinate framework.
-        self._spice_frame = 'J2000'
+        self._spice_frame = spice_frame
 
         # SPICE format for times
         self._fmt = '%Y %b %d, %H:%M:%S'
@@ -143,7 +138,7 @@ class Trajectory:
 
         Returns
         -------
-
+        `~astropy.coordinates.SkyCoord`
         """
         return self.coordinate_and_velocity(time, correction=correction)[0]
 
@@ -158,7 +153,7 @@ class Trajectory:
 
         Returns
         -------
-
+        `~astropy.units.Quantity`
         """
         return self.coordinate_and_velocity(time, correction=correction)[1]
 
@@ -175,7 +170,7 @@ class Trajectory:
         -------
 
         """
-        v = self.velocity(time, correction=correction)[1]
+        v = self.velocity(time, correction=correction)
         return np.sqrt(np.sum(v**2))
 
     @property
