@@ -64,7 +64,7 @@ class Trajectory:
     When an instance of this class is created, a leapseconds kernel and a
     planets kernel are both automatically loaded.
     """
-    def __init__(self, target, observing_body='Sun', spice_frame='J2000'):
+    def __init__(self, target, observing_body='Sun'):
         """
         Generate positions from a spice kernel.
 
@@ -84,7 +84,7 @@ class Trajectory:
         # SPICE frame used. The coordinate system to return the positions in. See
         # https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/frames.html for a list of frames.
         # This is set to J2000 as this can be used by the Astropy coordinate framework.
-        self._spice_frame = spice_frame
+        self._spice_frame = 'J2000'
 
         # SPICE format for times
         self._fmt = '%Y %b %d, %H:%M:%S'
