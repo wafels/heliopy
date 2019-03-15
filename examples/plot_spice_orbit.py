@@ -37,6 +37,7 @@ while starttime < endtime:
     times.append(starttime)
     starttime += timedelta(hours=6)
 
+
 ###############################################################################
 # Generate positions
 psp.generate_positions(times, 'Sun', 'ECLIPJ2000')

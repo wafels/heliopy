@@ -95,7 +95,9 @@ class Trajectory:
 
         Parameters
         ----------
-        time :
+        time : `~astropy.time.Time`
+            The position and velocity of the target is calculated at this time.
+
         correction :
 
         Returns
@@ -133,12 +135,15 @@ class Trajectory:
 
         Parameters
         ----------
-        time :
+        time : `~astropy.time.Time`
+            The position of the target is calculated at this time.
+
         correction :
 
         Returns
         -------
         `~astropy.coordinates.SkyCoord`
+            The position of the target.
         """
         return self.coordinate_and_velocity(time, correction=correction)[0]
 
@@ -148,12 +153,15 @@ class Trajectory:
 
         Parameters
         ----------
-        time :
+        time : `~astropy.time.Time`
+            The velocity of the target is calculated at this time.
+
         correction :
 
         Returns
         -------
         `~astropy.units.Quantity`
+            The velocity of the target.
         """
         return self.coordinate_and_velocity(time, correction=correction)[1]
 
@@ -163,11 +171,15 @@ class Trajectory:
 
         Parameters
         ----------
-        time :
+        time : `~astropy.time.Time`
+            The speed of the target is calculated at this time.
+
         correction :
 
         Returns
         -------
+        `~astropy.units.Quantity`
+            The speed of the target.
 
         """
         v = self.velocity(time, correction=correction)
