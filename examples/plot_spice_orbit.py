@@ -14,6 +14,7 @@ import heliopy.spice as spice
 from datetime import datetime, timedelta
 from astropy.time import Time
 import astropy.units as u
+from astropy.coordinates import get_body_barycentric, ICRS
 import numpy as np
 
 ###############################################################################
@@ -68,6 +69,9 @@ speeds = speeds * u.km/u.s
 times_float = [(t - times[0]).to(u.s).value for t in times] * u.s
 times = Time(times)
 
+# Calculate the Earth's orbit for the same time
+earth = get_body('earth', times).transform_to(ICRS).cartesian
+
 ###############################################################################
 # Plot the orbit. The orbit is plotted in 3D
 import matplotlib.pyplot as plt
@@ -76,12 +80,19 @@ from astropy.visualization import quantity_support
 quantity_support()
 
 # Generate a set of timestamps to color the orbits by
+dir = (1, 1, 0)
+index = 1000
+color = 'k'
 with quantity_support():
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     kwargs = {'s': 3, 'c': times_float}
     ax.scatter(x_positions, y_positions, z_positions, **kwargs)
-    ax.text(0, 0, 0, 'Sun', (1, 1, 0), color='k')
+    ax.text(x_positions[index].value, y_positions[index].value, z_positions[index].value, 'PSP', dir, color=color)
+    ax.scatter(earth.x, earth.y, earth.z, **kwargs)
+    ax.text(earth.x[index].value, earth.y[index].value, earth.z[index].value, 'Earth', dir, color=color)
+    ax.text(0, 0, 0, 'Sun', dir, color=color)
+    ax.set_title('PSP and Earth orbits\nlabels at {:s}'.format(str(times[index])))
     ax.plot([-1, 1], [0, 0], [0, 0])
     ax.plot([0, 0], [-1, 1], [0, 0])
     ax.plot([0, 0], [0, 0], [-1, 1])
