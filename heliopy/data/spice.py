@@ -8,6 +8,11 @@ and HelioPy should be using a newer kernel please let us know at
 https://github.com/heliopython/heliopy/issues.
 
 """
+
+# TODO
+# STEREO should read the definitive ahead/behind ephemerides files
+# https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/
+
 import os
 from urllib.request import urlretrieve
 import urllib.error
@@ -17,6 +22,44 @@ import heliopy.data.util as util
 
 data_dir = config['download_dir']
 spice_dir = os.path.join(data_dir, 'spice')
+
+
+def get_stereo_kernel_filenames(ephemerides_type, spacecraft):
+    """
+
+    :param ephemerides_type:
+    :param spacecraft:
+    :return:
+    """
+    # The root location where the SPICE kernels for STEREO are kept
+    root = 'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/'
+
+    # Information on the directory structure and filenames on where the ephemerides
+    ephemerides = {"definitive": {"ahead": "{:s}/definitive_ephemerides_ahead.dat".format(root),
+                                  "behind": "{:s}/definitive_ephemerides_behind.dat".format(root),
+                                  "subdir": "depm"},
+                   "predicted": {"ahead": "{:s}/ephemerides_ahead.dat".format(root),
+                                 "behind": "{:s}/ephemerides_behind.dat".format(root),
+                                 "subdir": "epm"}}
+
+    # Download the file
+    local_loc = os.path.join(spice_dir, "stereo_{:s}_{:s}_ephemerides.txt".format(ephemerides_type, spacecraft))
+    url = ephemerides[ephemerides_type][spacecraft]
+    try:
+        urlretrieve(url, local_loc, reporthook=util._reporthook)
+    except urllib.error.HTTPError as err:
+        print('Failed to download {}'.format(url))
+        raise err
+
+    # Read the file
+    with open(local_loc, 'r') as f:
+        kernel_filenames = f.readlines()
+    kernel_filenames = [x.strip() for x in kernel_filenames]
+
+    # Create the URLs for the ephemerides
+    subdir = ephemerides[ephemerides_type]["subdir"]
+    kernel_urls = ["{:s}{:s}/{:s}".format(root, subdir, kernel_filename) for kernel_filename in kernel_filenames]
+    return kernel_urls
 
 
 class _Kernel:
@@ -66,31 +109,10 @@ spacecraft_kernels = [_Kernel('Helios 1', 'helios1',
                               'https://naif.jpl.nasa.gov/pub/naif/JUNO/kernels/spk/juno_rec_orbit.bsp',
                               'https://naif.jpl.nasa.gov/pub/naif/JUNO/kernels/spk/aareadme.txt'),
                       _Kernel('STEREO-A', 'stereo_a',
-                              ['https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/ahead/ahead_2006_350_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/ahead/ahead_2008_037_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/ahead/ahead_2008_078_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/ahead/ahead_2010_208_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/ahead/ahead_2012_138_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/ahead/ahead_2013_130_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/ahead/ahead_2015_076_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/ahead/ahead_2015_219_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/ahead/ahead_2018_019_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/ahead/ahead_2019_030_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/ahead/ahead_2019_045_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/ahead/ahead_2019_060_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/ahead/ahead_2019_063_01.depm.bsp', ],
+                              get_stereo_kernel_filenames('definitive', 'ahead'),
                               ''),
                       _Kernel('STEREO-B', 'stereo_b',
-                              ['https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/behind/behind_2007_021_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/behind/behind_2007_053_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/behind/behind_2008_037_01.depm.bsp	',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/behind/behind_2008_078_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/behind/behind_2010_203_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/behind/behind_2011_193_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/behind/behind_2012_265_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/behind/behind_2014_002_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/behind/behind_2014_271_01.depm.bsp',
-                               'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/depm/behind/behind_2016_256_01.depm.bsp', ],
+                              get_stereo_kernel_filenames('definitive', 'behind'),
                               ''),
                       _Kernel('SOHO', 'soho',
                               ['https://sohowww.nascom.nasa.gov/sdb/soho/gen/spice/soho_1995.bsp',
@@ -136,12 +158,10 @@ predicted_kernels = [
             ['https://sppgway.jhuapl.edu/MOC/ephemeris//spp_nom_20180812_20250831_v035_RO2.bsp']
             ),
     _Kernel('STEREO-A', 'stereo_a_pred',
-            ['https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/epm/ahead/ahead_2017_061_5295day_predict.epm.bsp',
-             'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/epm/ahead/ahead_2019_063_01.epm.bsp']
+            get_stereo_kernel_filenames('predicted', 'ahead')
             ),
     _Kernel('STEREO-B', 'stereo_b_pred',
-            ['https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/epm/behind/behind_2009_049_definitive_predict.epm.bsp',
-             'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/epm/behind/behind_2019_060_01.epm.bsp']
+            get_stereo_kernel_filenames('predicted', 'behind')
             ),
     _Kernel('Juno Predicted', 'juno_pred',
             'https://naif.jpl.nasa.gov/pub/naif/JUNO/kernels/spk/juno_pred_orbit.bsp',
