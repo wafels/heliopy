@@ -9,9 +9,6 @@ https://github.com/heliopython/heliopy/issues.
 
 """
 
-# TODO
-# STEREO should read the definitive ahead/behind ephemerides files
-# https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/
 
 import os
 from urllib.request import urlretrieve
@@ -26,10 +23,25 @@ spice_dir = os.path.join(data_dir, 'spice')
 
 def get_stereo_kernel_filenames(ephemerides_type, spacecraft):
     """
+    Return a list of URLs that point to the STEREO kernels.
 
-    :param ephemerides_type:
-    :param spacecraft:
-    :return:
+    This function finds the latest available STEREO SPICE kernels.  STEREO maintains
+    a list of the SPICE kernels that should be used.  That list is updated every so
+    often.  This function obtains the list and downloads the SPICE kernels it
+    refers to.
+
+    Parameters
+    ----------
+    ephemerides_type : 'definitive', 'predicted'
+
+
+    spacecraft : 'ahead', 'behind'
+
+    Returns
+    -------
+    `list`
+        A list of URLs that point to the STEREO SPICE kernels
+
     """
     # The root location where the SPICE kernels for STEREO are kept
     root = 'https://sohowww.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/'
@@ -58,7 +70,7 @@ def get_stereo_kernel_filenames(ephemerides_type, spacecraft):
 
     # Create the URLs for the ephemerides
     subdir = ephemerides[ephemerides_type]["subdir"]
-    kernel_urls = ["{:s}{:s}/{:s}".format(root, subdir, kernel_filename) for kernel_filename in kernel_filenames]
+    kernel_urls = ["{:s}{:s}/{:s}/{:s}".format(root, subdir, spacecraft, kernel_filename) for kernel_filename in kernel_filenames]
     return kernel_urls
 
 
