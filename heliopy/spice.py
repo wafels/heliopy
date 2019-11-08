@@ -6,7 +6,8 @@ import heliopy.data.spice as dataspice
 import numpy as np
 import spiceypy
 import astropy.units as u
-from astropy.coordinates import SkyCoord, ICRS
+from astropy.coordinates import SkyCoord
+from sunpy.coordinates.frames import HeliocentricEarthEcliptic
 
 data_dir = config['download_dir']
 spice_dir = os.path.join(data_dir, 'spice')
@@ -83,8 +84,8 @@ class Trajectory:
 
         # SPICE frame used. The coordinate system to return the positions in. See
         # https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/frames.html for a list of frames.
-        # This is set to J2000 as this can be used by the Astropy coordinate framework.
-        self._spice_frame = 'J2000'
+        # This is set to HEE as this is implemented in SunPy.
+        self._spice_frame = 'HEE'
 
         # SPICE format for times
         self._fmt = '%Y %b %d, %H:%M:%S'
@@ -126,7 +127,7 @@ class Trajectory:
         velocities = np.array(position_and_velocity)[3:] * u.km / u.s
 
         return SkyCoord(position[0], position[1], position[2],
-                        frame=ICRS,
+                        frame=HeliocentricEarthEcliptic,
                         representation_type='cartesian', obstime=time), velocities
 
     def coordinate(self, time, correction="NONE"):
